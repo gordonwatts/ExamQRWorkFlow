@@ -18,9 +18,12 @@ namespace ExamWorkflowLibrary
     {
         private PdfReader _reader;
 
+        private FileInfo _db_file;
+
         public PDFScanner(FileInfo file)
         {
             _reader = new PdfReader(file.FullName);
+            _db_file = new FileInfo($"{file.Directory.FullName}\\{Path.GetFileNameWithoutExtension(file.Name)}-db.csv");
         }
 
         /// <summary>
@@ -31,36 +34,99 @@ namespace ExamWorkflowLibrary
             _reader.Dispose();
         }
 
+        /// <summary>
+        /// Return the pages information.
+        /// </summary>
+        /// <returns>The data from each qr code found on each page</returns>
+        /// <remarks>
+        /// Read the database file and return for those guys.
+        /// </remarks>
         public IEnumerable<string> GetPagesInfo()
         {
-            var qrDecoder = new BarcodeReader();
-            qrDecoder.Options.PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE };
-            qrDecoder.Options.TryHarder = true;
-            for (int i = 1; i <= _reader.NumberOfPages; i++)
+            var qr_info = LoadDBFile();
+
+            try
             {
-                // Get the first image from the page. We'll just assume for now.
-                var pageDict = _reader.GetPageN(i);
-                var pageImage = GetImagesFromPdfDict(pageDict)
-                    .Select(img => img as Bitmap)
-                    .Where(img => img != null).First();
+                var qrDecoder = new BarcodeReader();
+                qrDecoder.Options.PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE };
+                qrDecoder.Options.TryHarder = true;
 
-                pageImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                pageImage = CropIt(500, 500, pageImage);
-                pageImage = ConvertToBW(pageImage);
-
-                // Scan the QR code. If we can't find it, apply successivly harder and harder
-                // median filters. We do this progresively because the filter is very expensive
-                // (partly b.c. I'm not doing it efficiently, I suppose).
-                var r = Enumerable.Range(0, 3)
-                    .Select(m => m * 2)
-                    .Select(m => m == 0 ? pageImage : MedianFilter(pageImage, m))
-                    .Select(img => qrDecoder.Decode(img))
-                    .Where(code => code != null)
-                    .FirstOrDefault();
-
-                var txt = r == null ? "" : r.Text;
-                yield return $"{txt}";
+                // Look at each page. Attempt a quick lookup first
+                for (int i = 1; i <= _reader.NumberOfPages; i++)
+                {
+                    var qr_txt = qr_info.TryGetValue(i, out string v)
+                        ? v
+                        : DecodePageQR(qrDecoder, i);
+                    qr_info[i] = qr_txt;
+                    yield return qr_txt;
+                }
+            } finally
+            {
+                // Save our work!
+                SaveDBFile(qr_info);
             }
+        }
+
+        /// <summary>
+        /// Look at a page and location our QR code, and extract it, return its contents.
+        /// </summary>
+        /// <param name="qrDecoder"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        private string DecodePageQR(BarcodeReader qrDecoder, int i)
+        {
+
+            // Scan the page for the information now.
+            var pageDict = _reader.GetPageN(i);
+            var pageImage = GetImagesFromPdfDict(pageDict)
+                .Select(img => img as Bitmap)
+                .Where(img => img != null).First();
+
+            pageImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            pageImage = CropIt(500, 500, pageImage);
+            pageImage = ConvertToBW(pageImage);
+
+            // Scan the QR code. If we can't find it, apply successivly harder and harder
+            // median filters. We do this progresively because the filter is very expensive
+            // (partly b.c. I'm not doing it efficiently, I suppose).
+            var r = Enumerable.Range(0, 3)
+                .Select(m => m * 2)
+                .Select(m => m == 0 ? pageImage : MedianFilter(pageImage, m))
+                .Select(img => qrDecoder.Decode(img))
+                .Where(code => code != null)
+                .FirstOrDefault();
+
+            var txt = r == null ? "" : r.Text;
+            return txt;
+        }
+
+        /// <summary>
+        /// Return a dict of each page number in this file
+        /// </summary>
+        /// <returns></returns>
+        private IDictionary<int,string> LoadDBFile()
+        {
+            // If not there, then nothing.
+            if (!_db_file.Exists)
+            {
+                return new Dictionary<int, string>();
+            }
+
+            // Read it in. Regular CSV file so the user can edit if need be.
+            return File.ReadAllLines(_db_file.FullName)
+                .Select(ln => ln.Split(','))
+                .ToDictionary(i => int.Parse(i[0]), i => i[1]);
+        }
+
+        /// <summary>
+        /// Save to a dictionary file the database.
+        /// </summary>
+        /// <param name="dict"></param>
+        private void SaveDBFile(IDictionary<int, string> dict)
+        {
+            File.WriteAllLines(_db_file.FullName,
+                    dict.Select(i => $"{i.Key},{i.Value}")
+                );
         }
 
         /// <summary>
