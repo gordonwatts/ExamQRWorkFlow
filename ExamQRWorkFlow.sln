@@ -3,7 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamWorkflowLibrary", "ExamWorkflowLibrary\ExamWorkflowLibrary.csproj", "{05256FD0-A17C-4CAA-8F7C-8CADE6252BCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamSplitter", "ExamSplitter\ExamSplitter.csproj", "{B3A86502-6AE3-4B69-B098-1260FE1F11A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReadImage", "TestReadImage\TestReadImage.csproj", "{67CE219F-D47E-4287-BBC5-2F4693F047CD}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05256FD0-A17C-4CAA-8F7C-8CADE6252BCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05256FD0-A17C-4CAA-8F7C-8CADE6252BCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05256FD0-A17C-4CAA-8F7C-8CADE6252BCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05256FD0-A17C-4CAA-8F7C-8CADE6252BCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A86502-6AE3-4B69-B098-1260FE1F11A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A86502-6AE3-4B69-B098-1260FE1F11A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A86502-6AE3-4B69-B098-1260FE1F11A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A86502-6AE3-4B69-B098-1260FE1F11A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
