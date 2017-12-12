@@ -16,10 +16,6 @@ namespace TestReadImage
             // Load test image
             var img = Image.FromFile("junk.png") as Bitmap;
 
-            var qrDecoder = new BarcodeReader();
-            qrDecoder.Options.PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE };
-            qrDecoder.Options.TryHarder = true;
-
             // Could scaling it down make a difference?
             //img = ScaleImage(0.25f, img);
 
@@ -31,6 +27,10 @@ namespace TestReadImage
 
             // Cropping the lower faint line off it?
             //img.Save("newjunk.png", ImageFormat.Png);
+
+            var qrDecoder = new BarcodeReader();
+            qrDecoder.Options.PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE };
+            qrDecoder.Options.TryHarder = true;
 
             var result = qrDecoder.Decode(img);
             if (result == null)
