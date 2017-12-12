@@ -14,13 +14,13 @@ namespace ExamWorkflowLibrary
     /// <summary>
     /// Low level code to extract information from PDF file.
     /// </summary>
-    public class PDFScanner : IDisposable
+    public class PDFFileHandler : IDisposable
     {
         private PdfReader _reader;
 
         private FileInfo _db_file;
 
-        public PDFScanner(FileInfo file)
+        public PDFFileHandler(FileInfo file)
         {
             _reader = new PdfReader(file.FullName);
             _db_file = new FileInfo($"{file.Directory.FullName}\\{Path.GetFileNameWithoutExtension(file.Name)}-db.csv");
@@ -41,7 +41,7 @@ namespace ExamWorkflowLibrary
         /// <remarks>
         /// Read the database file and return for those guys.
         /// </remarks>
-        public IEnumerable<string> GetPagesInfo()
+        public IEnumerable<(int pageNum, string tagText)> GetPagesInfo()
         {
             var qr_info = LoadDBFile();
 
@@ -58,7 +58,7 @@ namespace ExamWorkflowLibrary
                         ? v
                         : DecodePageQR(qrDecoder, i);
                     qr_info[i] = qr_txt;
-                    yield return qr_txt;
+                    yield return (i,qr_txt);
                 }
             } finally
             {
@@ -264,6 +264,28 @@ namespace ExamWorkflowLibrary
                 }
             }
             return NewBitmap;
+        }
+
+        /// <summary>
+        /// Copy a series of pages (in order) from our file into a destination file.
+        /// </summary>
+        /// <param name="destFile"></param>
+        /// <param name="pageNumbers"></param>
+        public void CopyPages (FileInfo destFile, IEnumerable<int> pageNumbers)
+        {
+            using (var binaryWriter = destFile.Create())
+            {
+                var doc = new iTextSharp.text.Document();
+                var pdfWriter = new PdfCopy(doc, binaryWriter);
+                doc.Open();
+
+                foreach (var pNumber in pageNumbers)
+                {
+                    var page = pdfWriter.GetImportedPage(_reader, pNumber);
+                    pdfWriter.AddPage(page);
+                }
+                doc.Close();
+            }
         }
     }
 }
