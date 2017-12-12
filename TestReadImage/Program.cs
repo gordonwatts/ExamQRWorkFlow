@@ -17,6 +17,7 @@ namespace TestReadImage
 
             var qrDecoder = new BarcodeReader();
             qrDecoder.Options.PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE };
+            qrDecoder.Options.TryHarder = true;
 
             var result = qrDecoder.Decode(img as Bitmap);
             if (result == null)
