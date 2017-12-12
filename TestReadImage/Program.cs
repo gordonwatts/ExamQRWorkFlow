@@ -20,7 +20,7 @@ namespace TestReadImage
             //img = ScaleImage(0.25f, img);
 
             // How about making it *really* black and white?
-            //img = ConvertToBW(img);
+            img = ConvertToBW(img);
 
             // Crop from bottom?
             //img = CropFromBottom(40, img);
@@ -79,7 +79,7 @@ namespace TestReadImage
                 {
                     var p = source.GetPixel(i_x, i_y);
                     int rgb = p.R + p.G + p.B;
-                    var color = rgb > 600
+                    var color = rgb > 710
                         ? Color.White
                         : Color.Black;
                     result.SetPixel(i_x, i_y, color);

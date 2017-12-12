@@ -45,12 +45,21 @@ namespace ExamWorkflowLibrary
                     .Where(img => img != null).First();
 
                 pageImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                pageImage = CropIt(400, 400, pageImage);
-                pageImage.Save("junk.png", ImageFormat.Png);
+                pageImage = CropIt(500, 500, pageImage);
+                pageImage = ConvertToBW(pageImage);
 
-                // Now get the QR Code scanner
-                var r = qrDecoder.Decode(pageImage);
-                yield return $"{i} - hi";
+                // Scan the QR code. If we can't find it, apply successivly harder and harder
+                // median filters. We do this progresively because the filter is very expensive
+                // (partly b.c. I'm not doing it efficiently, I suppose).
+                var r = Enumerable.Range(0, 3)
+                    .Select(m => m * 2)
+                    .Select(m => m == 0 ? pageImage : MedianFilter(pageImage, m))
+                    .Select(img => qrDecoder.Decode(img))
+                    .Where(code => code != null)
+                    .FirstOrDefault();
+
+                var txt = r == null ? "" : r.Text;
+                yield return $"{txt}";
             }
         }
 
@@ -61,7 +70,7 @@ namespace ExamWorkflowLibrary
         /// <param name="v2"></param>
         /// <param name="pageImage"></param>
         /// <returns></returns>
-        private Bitmap CropIt(int width, int height, Bitmap pageImage)
+        private static Bitmap CropIt(int width, int height, Bitmap pageImage)
         {
             var newImage = new Bitmap(width, height);
             using (var gr = Graphics.FromImage(newImage))
@@ -71,6 +80,34 @@ namespace ExamWorkflowLibrary
             return newImage;
         }
 
+        /// <summary>
+        /// Apply a threshold to see if we can convert greyscale to B&W.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// https://stackoverflow.com/questions/5963380/unsafe-image-noise-removal-in-c-sharp-error-bitmap-region-is-already-locked
+        /// Could probably use that to create a much more efficient version of this.
+        /// </remarks>
+        private static Bitmap ConvertToBW(Bitmap source)
+        {
+            var result = new Bitmap(source.Width, source.Height);
+
+            for (int i_x = 0; i_x < source.Width; i_x++)
+            {
+                for (int i_y = 0; i_y < source.Height; i_y++)
+                {
+                    var p = source.GetPixel(i_x, i_y);
+                    int rgb = p.R + p.G + p.B;
+                    var color = rgb > 710
+                        ? Color.White
+                        : Color.Black;
+                    result.SetPixel(i_x, i_y, color);
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Get back images from the PDF file page.
@@ -114,6 +151,53 @@ namespace ExamWorkflowLibrary
             }
 
             return images;
+        }
+
+        public static Bitmap MedianFilter(Bitmap Image, int Size)
+        {
+            Bitmap TempBitmap = Image;
+            Bitmap NewBitmap = new Bitmap(TempBitmap.Width, TempBitmap.Height);
+            Graphics NewGraphics = Graphics.FromImage(NewBitmap);
+            NewGraphics.DrawImage(TempBitmap, new Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), new Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), GraphicsUnit.Pixel);
+            NewGraphics.Dispose();
+            Random TempRandom = new Random();
+            int ApetureMin = -(Size / 2);
+            int ApetureMax = (Size / 2);
+            for (int x = 0; x < NewBitmap.Width; ++x)
+            {
+                for (int y = 0; y < NewBitmap.Height; ++y)
+                {
+                    var RValues = new List<int>();
+                    var GValues = new List<int>();
+                    var BValues = new List<int>();
+                    for (int x2 = ApetureMin; x2 < ApetureMax; ++x2)
+                    {
+                        int TempX = x + x2;
+                        if (TempX >= 0 && TempX < NewBitmap.Width)
+                        {
+                            for (int y2 = ApetureMin; y2 < ApetureMax; ++y2)
+                            {
+                                int TempY = y + y2;
+                                if (TempY >= 0 && TempY < NewBitmap.Height)
+                                {
+                                    Color TempColor = TempBitmap.GetPixel(TempX, TempY);
+                                    RValues.Add(TempColor.R);
+                                    GValues.Add(TempColor.G);
+                                    BValues.Add(TempColor.B);
+                                }
+                            }
+                        }
+                    }
+                    RValues.Sort();
+                    GValues.Sort();
+                    BValues.Sort();
+                    Color MedianPixel = Color.FromArgb(RValues[RValues.Count / 2],
+                        GValues[GValues.Count / 2],
+                        BValues[BValues.Count / 2]);
+                    NewBitmap.SetPixel(x, y, MedianPixel);
+                }
+            }
+            return NewBitmap;
         }
     }
 }
