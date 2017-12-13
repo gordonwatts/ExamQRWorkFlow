@@ -287,5 +287,17 @@ namespace ExamWorkflowLibrary
                 doc.Close();
             }
         }
+
+        /// <summary>
+        /// Fetch a page for importing to other places.
+        /// </summary>
+        /// <param name="pnum"></param>
+        /// <returns></returns>
+        public void AddPageTo(PdfCopy copier, int pnum)
+        {
+            var page = copier.GetImportedPage(_reader, pnum);
+            copier.AddPage(page);
+        }
+
     }
 }

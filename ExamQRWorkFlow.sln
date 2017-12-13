@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamSplitter", "ExamSplitte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReadImage", "TestReadImage\TestReadImage.csproj", "{67CE219F-D47E-4287-BBC5-2F4693F047CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamCombiner", "ExamCombiner\ExamCombiner.csproj", "{76DE22C9-297C-415E-BC27-C9B0C84264CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67CE219F-D47E-4287-BBC5-2F4693F047CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76DE22C9-297C-415E-BC27-C9B0C84264CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76DE22C9-297C-415E-BC27-C9B0C84264CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76DE22C9-297C-415E-BC27-C9B0C84264CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76DE22C9-297C-415E-BC27-C9B0C84264CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

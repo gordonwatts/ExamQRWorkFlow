@@ -23,7 +23,7 @@ namespace ExamSplitter
             }
 
             // Load, if there, the exam roster id stuff
-            var examRoster = RosterForExamUtils.LoadDBFile(inputFile);
+            var examRoster = RosterForExamUtils.LoadDBFileForScanFile(inputFile);
 
             // Build a catalog of the PDF file
             var inputPDFFile = new PDFFileHandler(inputFile);

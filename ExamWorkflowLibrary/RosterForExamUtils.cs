@@ -26,7 +26,7 @@ namespace ExamWorkflowLibrary
         /// Return a dict of each page number in this file
         /// </summary>
         /// <returns></returns>
-        public static IDictionary<int, NameInfo> LoadDBFile(FileInfo scanFile)
+        public static IDictionary<int, NameInfo> LoadDBFileForScanFile(FileInfo scanFile)
         {
             // If not there, then nothing.
             var db_file = GetDBFile(scanFile);
@@ -36,6 +36,16 @@ namespace ExamWorkflowLibrary
             }
 
             // Read it in. Regular CSV file so the user can edit if need be.
+            return LoadDBFile(db_file);
+        }
+
+        /// <summary>
+        /// Load a raw db file.
+        /// </summary>
+        /// <param name="db_file"></param>
+        /// <returns></returns>
+        public static IDictionary<int, NameInfo> LoadDBFile(FileInfo db_file)
+        {
             return File.ReadAllLines(db_file.FullName)
                 .Select(ln => ln.Split(','))
                 .Select(sln => new NameInfo() { ExamID = int.Parse(sln[0]), LastName = sln[1], FirstName = sln[2] })
